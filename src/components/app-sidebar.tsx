@@ -1,8 +1,8 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { Banknote, LucideIcon } from "lucide-react";
 import ModeToggle from "./mode-toogle";
-import NavUser from "./user-nav";
 import { UserDb } from "@/types/user";
+import { UserNav } from "./user-nav";
 type Item  = {
     title: string
     url: string
@@ -50,7 +50,7 @@ export function AppSideBar({user}: AppSideBarProps
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
-                <NavUser  user={user}/>
+                <UserNav  user={user}/>
             </SidebarFooter>
         </Sidebar>
     )
