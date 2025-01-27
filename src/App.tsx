@@ -16,7 +16,8 @@ function App() {
   const [lastMonthPercentage, setLastMonthPercentage] = useState(0)
   const navigate = useNavigate()
   if (!user) {
-    return <>Verificando autenticação...</>;
+    navigate("/login")
+    return
   }
   useEffect(() => {
     const getTotalExpense = async () => {
