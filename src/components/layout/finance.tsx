@@ -38,8 +38,8 @@ const Finances = ({ user_email }: FinacesProps) => {
                         </svg>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">R${total ? total.toFixed(2) : "Carregando..."}</div>
-                        <p className="text-xs text-muted-foreground">{lastMonthPercentage ? lastMonthPercentage.toFixed(2) : "Carregando..."}%   do ultimo mês</p>
+                        <div className="text-2xl font-bold">R${total ? total.toFixed(2) : 0}</div>
+                        <p className="text-xs text-muted-foreground">{lastMonthPercentage ? lastMonthPercentage.toFixed(2) : 0}%   do ultimo mês</p>
                     </CardContent>
                 </Card>
             </div>
