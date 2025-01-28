@@ -69,21 +69,7 @@ const AddExpense = () => {
         }
     })
     if (isError) toast.error(error instanceof Error ? error.message : "Error ao buscar tags")
-    const submitExpense = async (expenseInput: ExpenseInput) => {
-        try {
-            expenseInput.user_email = user.email
-            await RegisteExpense(expenseInput)
-            toast.success("Gasto salvo com sucesso")
-            navigate("/")
-        } catch (ex) {
-            if (ex instanceof Error) {
-                toast.error(ex.message)
-            } else {
-                console.log("Error: ", ex)
-                toast.error('Um error aconteceu.Tente novamente mais tarde')
-            }
-        }
-    }
+
     return (
         <main className="min-h-screen flex items-center justify-center bg-gray-100">
             <Card className="mx-auto max-w-md">

@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ExpenseInput } from "@/types/expenses"
 import { GetExpenseById, UpdateExpense } from "@/lib/expenses-db"
 import { useUser } from "@/contexts/user-context"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 const EditExpense = () => {
     const params = useParams();
@@ -41,23 +41,15 @@ const EditExpense = () => {
         queryKey: ["edit-expense", { id }],
         queryFn: () => GetExpenseById(Number.parseInt(id!))
     });
-
-    console.log(expense)
-    const { handleSubmit, register, formState: { errors }, watch } = useForm<ExpenseInput>({values: {expense_date: expense?.expense_date!, value: expense?.value!, tag_id: expense?.tags.id!, user_email: expense?.user_email!} });
+    const { handleSubmit, register, formState: { errors }, watch } = useForm<ExpenseInput>({values: {expense_date: expense ?  expense.expense_date : new Date(), value: expense?.value!, tag_id: expense?.tag_id!, user_email: expense?.user_email!} });
     if (!id || Number.isNaN(Number(id))) {
         navigate("/");
         return null;
     }
 
-    if (isLoading) return <>Loading...</>;
-    if (isErrorExpense) {
-        toast.error("Erro ao buscar gasto");
-        navigate("/");
-        return null;
-    }
     const updateExpense = async (id: number, expenseInput: ExpenseInput) => {
         try {
-            expense.user_email = user.email
+            expenseInput.user_email = user.email
             await UpdateExpense(id, expenseInput)
             queryClient.invalidateQueries(["currentMonthTotal", "lastMonthPercentage", "expenseManegement"]);
             navigate("/");
@@ -83,7 +75,14 @@ const EditExpense = () => {
             toast.error(ex instanceof Error ? ex.message : "Um erro aconteceu. Tente novamente mais tarde");
         }
     };
+    if (isLoading || !expense) return <>Loading...</>;
+    if (isErrorExpense) {
+        toast.error("Erro ao buscar gasto");
+        navigate("/");
+        return null
+    }
     if (isError) toast.error(error instanceof Error ? error.message : "Error ao buscar tags")
+        console.log()
     return (
         <main className="min-h-screen flex items-center justify-center bg-gray-100">
             <Card className="mx-auto max-w-md">
@@ -147,12 +146,12 @@ const EditExpense = () => {
                                         const event = { target: { name: "tag_id", value: numberValue } };
                                         register("tag_id", { required: { value: true, message: "Escolha uma tag. Se não tiver uma clique em 'Criar Nova Tag'" } }).onChange(event);
                                     }}
-                                    defaultValue={expense.tags.id.toString()}
+                                    defaultValue={expense ? expense.tag_id.toString() : ""}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Selecione uma categoria" />
                                     </SelectTrigger>
-                                    <SelectContent defaultValue={expense?.tags.tag}>
+                                    <SelectContent>
                                         <SelectGroup>
                                             {tags?.map((tag) => (
                                                 <SelectItem key={tag.id} value={tag.id.toString()}>{tag.tag}</SelectItem>

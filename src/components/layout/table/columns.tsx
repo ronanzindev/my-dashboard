@@ -1,8 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger,DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Expenses } from "@/types/expenses"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
 import TableActions from "./actions"
 
 export const columns: ColumnDef<Expenses>[] = [
