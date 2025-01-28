@@ -1,22 +1,16 @@
 import { GetExpenseChart } from "@/lib/expenses-db"
-import { ExpenseDataChart } from "@/types/expenses"
-import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "react-toastify"
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from "recharts"
 
 interface ExpenseChartProps {
   user_email: string
 }
 export function ExpenseChart({user_email}: ExpenseChartProps) {
-    const [expenseData, setExpenseDate] = useState<ExpenseDataChart[]>()
-    useEffect(() => {
-      const getChartData = async () => {
-        const data = await GetExpenseChart(user_email)
-        setExpenseDate(data)
-      }
-      getChartData()
-    }, [])
-    if(!expenseData) {
-      return <>Carregando dados</>
+    const {data: expenseData, error, isError, isLoading} = useQuery({queryKey: ["expenseData", {user_email}], queryFn: () => GetExpenseChart(user_email)})
+    if(isError) toast.error(error instanceof Error ? error.message : "Error ao buscar dados do grafico")
+    if(isLoading) {
+      return <>Carregando dados...</>
     }
     return (
         <ResponsiveContainer width="100%" height={350}>
@@ -40,10 +34,10 @@ export function ExpenseChart({user_email}: ExpenseChartProps) {
             dataKey="total"
             fill="#adfa1d"
             radius={[4, 4, 0, 0]}
-          
+
           />
         </BarChart>
       </ResponsiveContainer>
-  
+
     )
 }

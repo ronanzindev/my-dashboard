@@ -12,8 +12,15 @@ export type ExpenseDataChart = {
     total: number
 }
 
-export type RecentExpenses = {
+export type Expenses = {
     id: number
     value: number
     tags: Tag
+}
+export type Expense = {
+    id: number,
+    value: number,
+    expense_date: Date,
+    tags: Tag,
+    user_email: string
 }

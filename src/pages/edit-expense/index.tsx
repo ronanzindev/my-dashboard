@@ -9,7 +9,7 @@ import { ptBR } from "date-fns/locale"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { toast } from "react-toastify"
-import { useNavigate } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { TagInput } from "@/types/tags"
@@ -17,86 +17,86 @@ import { createTagDb, getTagsDb } from "@/lib/tag"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ExpenseInput } from "@/types/expenses"
-import { RegisteExpense } from "@/lib/expenses-db"
+import { GetExpenseById, UpdateExpense } from "@/lib/expenses-db"
 import { useUser } from "@/contexts/user-context"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-const AddExpense = () => {
-    const { user } = useUser()
-    if (!user) return <>Loading...</>
+const EditExpense = () => {
+    const params = useParams();
+    const id = params.id;
+    const navigate = useNavigate();
+    const { user } = useUser();
+    const queryClient = useQueryClient();
 
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tagData, setTagData] = useState("");
 
-    const [tagData, setTagData] = useState("")
+    if (!user) return <>Carregando...</>
+    const { data: tags, isError, error } = useQuery({
+        queryKey: ["tags", { user_email: user?.email }],
+        queryFn: () => getTagsDb(user.email),
+    });
 
-    const navigate = useNavigate()
+    const { data: expense, isError: isErrorExpense, isLoading } = useQuery({
+        queryKey: ["edit-expense", { id }],
+        queryFn: () => GetExpenseById(Number.parseInt(id!))
+    });
 
-    const { handleSubmit, register, formState: { errors }, watch } = useForm<ExpenseInput>({ defaultValues: { expense_date: new Date() } })
+    console.log(expense)
+    const { handleSubmit, register, formState: { errors }, watch } = useForm<ExpenseInput>({values: {expense_date: expense?.expense_date!, value: expense?.value!, tag_id: expense?.tags.id!, user_email: expense?.user_email!} });
+    if (!id || Number.isNaN(Number(id))) {
+        navigate("/");
+        return null;
+    }
 
-    const queryClient = useQueryClient()
-    const { data: tags, isError, error } = useQuery({ queryKey: ["tags", { user_email: user.email }], queryFn: () => getTagsDb(user.email) })
-    if (!user) return <>Loading...</>
+    if (isLoading) return <>Loading...</>;
+    if (isErrorExpense) {
+        toast.error("Erro ao buscar gasto");
+        navigate("/");
+        return null;
+    }
+    const updateExpense = async (id: number, expenseInput: ExpenseInput) => {
+        try {
+            expense.user_email = user.email
+            await UpdateExpense(id, expenseInput)
+            queryClient.invalidateQueries(["currentMonthTotal", "lastMonthPercentage", "expenseManegement"]);
+            navigate("/");
+        } catch(ex) {
+            console.log(ex)
+            if(ex instanceof Error) {
+                toast.error(ex.message)
+            }
+        }
+    }
+
     const addNewTag = async (tagData: TagInput) => {
         try {
             if (tagData.tag.trim() === "") {
-                toast.error("A tag não pode estar vazia")
-                return
+                toast.error("A tag não pode estar vazia");
+                return;
             }
-            const newTag = await createTagDb(tagData)
-            tags?.push(newTag)
-            setIsModalOpen(false)
-            toast.success("Tag adicionada com sucesso!")
+            const newTag = await createTagDb(tagData);
+            tags?.push(newTag);
+            setIsModalOpen(false);
+            toast.success("Tag adicionada com sucesso!");
         } catch (ex) {
-            if (ex instanceof Error) {
-                toast.error(ex.message)
-            } else {
-                console.log("Error: ", ex)
-                toast.error('Um error aconteceu.Tente novamente mais tarde')
-            }
+            toast.error(ex instanceof Error ? ex.message : "Um erro aconteceu. Tente novamente mais tarde");
         }
-
-    }
-    const { mutateAsync: registerExpenseMutation } = useMutation({
-        mutationFn: RegisteExpense,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["currentMonthTotal", "lastMonthPercentage"])
-            toast.success("Gasto salvo com sucesso")
-            navigate("/")
-        },
-        onError: (err) => {
-            console.log(err)
-            toast.error(err instanceof Error ? err.message : "Error ao salvar gasto")
-        }
-    })
+    };
     if (isError) toast.error(error instanceof Error ? error.message : "Error ao buscar tags")
-    const submitExpense = async (expenseInput: ExpenseInput) => {
-        try {
-            expenseInput.user_email = user.email
-            await RegisteExpense(expenseInput)
-            toast.success("Gasto salvo com sucesso")
-            navigate("/")
-        } catch (ex) {
-            if (ex instanceof Error) {
-                toast.error(ex.message)
-            } else {
-                console.log("Error: ", ex)
-                toast.error('Um error aconteceu.Tente novamente mais tarde')
-            }
-        }
-    }
     return (
         <main className="min-h-screen flex items-center justify-center bg-gray-100">
             <Card className="mx-auto max-w-md">
                 <CardHeader className="">
                     <CardTitle className="text-2x1 font-bold">
-                        Adicionar Gasto
+                        Editar Gasto
                     </CardTitle>
                     <CardDescription>Por favor preencha os dados do gasto abaixo</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(async (formData) => {
+                    <form onSubmit={handleSubmit((formData) => {
                         formData.user_email = user.email
-                        await registerExpenseMutation(formData)
+                        updateExpense(Number.parseInt(id), formData)
                     }
                     )} className="">
                         <div className="space-y-4">
@@ -132,6 +132,7 @@ const AddExpense = () => {
                                                 }
                                             }}
                                             initialFocus
+
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -146,17 +147,17 @@ const AddExpense = () => {
                                         const event = { target: { name: "tag_id", value: numberValue } };
                                         register("tag_id", { required: { value: true, message: "Escolha uma tag. Se não tiver uma clique em 'Criar Nova Tag'" } }).onChange(event);
                                     }}
+                                    defaultValue={expense.tags.id.toString()}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Selecione uma categoria" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent defaultValue={expense?.tags.tag}>
                                         <SelectGroup>
                                             {tags?.map((tag) => (
                                                 <SelectItem key={tag.id} value={tag.id.toString()}>{tag.tag}</SelectItem>
                                             ))}
                                         </SelectGroup>
-
                                     </SelectContent>
                                 </Select>
                                 {errors.tag_id && (
@@ -198,4 +199,4 @@ const AddExpense = () => {
     )
 }
 
-export default AddExpense
+export default EditExpense

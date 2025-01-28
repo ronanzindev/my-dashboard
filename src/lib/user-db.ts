@@ -8,15 +8,13 @@ const COOKIE_JWT_NAME = "jwt-token"
 const COOKIE_JWT_EXPIRES = 30
 const USER_TABLE = "users"
 const registerUser = async (user: User) => {
-    const { data, error } = await supabase.from(USER_TABLE).insert(user).select("*").returns<UserDb>().single()
-    if (error || !data) {
+    const { data: savedUser, error } = await supabase.from(USER_TABLE).insert(user).select("*").returns<UserDb>()
+    if (error || !savedUser) {
         if (error?.code == "23505") {
             throw new Error("Email indisponivel, por favor selecione outro")
         }
         throw new Error("Error ao cadastrar usuario")
-
     }
-    const savedUser = data as UserDb
     const token = await new jose.SignJWT({ id: savedUser.id, email: savedUser.email, name: savedUser.name }).setProtectedHeader(({ alg: "HS256" })).setExpirationTime("30d").sign(new TextEncoder().encode(privateKey))
     setToken(token)
     return savedUser
@@ -40,9 +38,16 @@ const login = async (userData: LoginInput) => {
 const setToken = (token: string) => {
     Cookies.set(COOKIE_JWT_NAME, token, { expires: COOKIE_JWT_EXPIRES })
 }
-const getUser = async (token: string) => {
+const getUserByToken = async (token: string) => {
     const decodedToken = jose.decodeJwt(token)
+    if(!decodedToken.exp) {
+        return null
+    }
+    const currentTime = Math.floor(Date.now() / 1000)
+    if(decodedToken.exp < currentTime) {
+        return null
+    }
     const user = await getUserDb(decodedToken.email as string)
     return user
 }
-export { registerUser, login, getUserDb, getUser }
+export { registerUser, login, getUserDb, getUserByToken }

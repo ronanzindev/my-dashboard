@@ -1,14 +1,15 @@
-import { ExpenseDataChart, ExpenseInput, RecentExpenses } from "@/types/expenses";
+import { Expense, ExpenseDataChart, ExpenseInput, Expenses } from "@/types/expenses";
 import supabase from "./supabase";
 
 const EXPENSE_TABLE = "expenses"
-const registeExpense = async (expense: ExpenseInput) => {
+export const RegisteExpense = async (expense: ExpenseInput) => {
     const result = await supabase.from(EXPENSE_TABLE).insert(expense)
     if (result.error || result.status !== 201) {
         throw Error("Error ao salvar gasto!")
     }
 }
-const GetExpenseChart = async (user_email: string) => {
+
+export const GetExpenseChart = async (user_email: string) => {
     const { data, error } = await supabase.rpc("get_expense_data", { email: user_email }, { get: true }).limit(12)
     if (error) {
         throw new Error("Error ao buscar dados do gastos")
@@ -16,7 +17,7 @@ const GetExpenseChart = async (user_email: string) => {
     return data as ExpenseDataChart[]
 }
 
-const GetCurrentMonthTotal = async (user_email: string) => {
+export const GetCurrentMonthTotal = async (user_email: string) => {
     const date = new Date()
     const result = await supabase.from(EXPENSE_TABLE).select("value").eq("user_email", user_email)
         .gte("expense_date", new Date(date.getFullYear(), date.getMonth(), 1).toISOString())
@@ -27,7 +28,7 @@ const GetCurrentMonthTotal = async (user_email: string) => {
     return total
 }
 
-const GetLastMonthExpensePercentage = async (user_email: string, currentMonthTotal: number) => {
+export const GetLastMonthExpensePercentage = async (user_email: string, currentMonthTotal: number) => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1); // Define o mês para o anterior
     const anoAnterior = date.getFullYear();
@@ -46,12 +47,37 @@ const GetLastMonthExpensePercentage = async (user_email: string, currentMonthTot
     return percentage
 }
 
-const GetRecentExpenses = async (user_email: string) => {
-    const {data, error} = await supabase.from(EXPENSE_TABLE).select("id, value, tags(tag)").eq("user_email", user_email).order("expense_date", {ascending: false}).returns<RecentExpenses[]>().limit(5)
+export const GetRecentExpenses = async (user_email: string) => {
+    const {data, error} = await supabase.from(EXPENSE_TABLE).select("id, value, tags(tag)").eq("user_email", user_email).order("expense_date", {ascending: false}).returns<Expenses[]>().limit(5)
     if(error) {
         throw new Error("Error ao buscar dados dos ultimos gastos")
     }
     return data
 }
 
-export { registeExpense, GetExpenseChart, GetCurrentMonthTotal, GetLastMonthExpensePercentage, GetRecentExpenses }
+export const AllExpense = async (user_email: string) => {
+    const {data, error} = await supabase.from(EXPENSE_TABLE).select("value, id, tags(tag)").eq("user_email", user_email).order("created_at").returns<Expenses[]>()
+    if(error) {
+        throw new Error("Error ao buscar gastos")
+    }
+    return data
+}
+
+export const DeleteExpense  = async(id:number) => {
+    const {error} = await supabase.from(EXPENSE_TABLE).delete().eq("id",id)
+    if(error) {
+        throw new Error("Error ao deletar gasto")
+    }
+}
+
+export const UpdateExpense = async(id: number, expense: ExpenseInput) => {
+    console.log(expense)
+    const {error} = await supabase.from(EXPENSE_TABLE).update(expense).eq("id", id)
+    if (error) throw new Error("Erro ao atualizar gasto")
+}
+
+export const GetExpenseById = async (id: number) => {
+    const {data, error} = await supabase.from(EXPENSE_TABLE).select("id,value, expense_date, user_email, tags(tag, id, user_email)").eq("id", id).single()
+    if (error) throw new Error("Erro ao buscar gasto")
+    return data as Expense
+}
