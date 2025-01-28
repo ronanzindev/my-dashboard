@@ -23,17 +23,15 @@ const registerUser = async (user: User) => {
 }
 
 const getUserDb = async (email: string): Promise<UserDb> => {
-    const result = await supabase.from(USER_TABLE).select("email, name, password").eq("email", email)
-    if (result.error) {
-        throw new Error("Error ao buscar usuario")
-    }
-    if (!result.data) {
+    const {data: user, error} = await supabase.from(USER_TABLE).select("email, name, password").eq("email", email).returns<UserDb>().single()
+    if (error) {
         throw new Error("Usuario não encontrado")
     }
-    return result.data[0] as UserDb
+    return user
 }
 const login = async (userData: LoginInput) => {
     const userDb = await getUserDb(userData.email)
+    if(!userDb) throw new Error("Usuario não encontrado")
     if (!await bcrypt.compare(userData.password, userDb.password)) throw Error("Senha invalida")
     const token = await new jose.SignJWT({ id: userDb.id, email: userDb.email, name: userDb.name }).setProtectedHeader(({ alg: "HS256" })).setExpirationTime("30d").sign(new TextEncoder().encode(privateKey))
     setToken(token)

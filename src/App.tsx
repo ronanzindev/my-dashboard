@@ -15,17 +15,14 @@ function App() {
   const [totalExpense, setTotalExpense] = useState(0)
   const [lastMonthPercentage, setLastMonthPercentage] = useState(0)
   const navigate = useNavigate()
-  if (!user) {
-    navigate("/login")
-    return
-  }
+  if(!user) return <>Loading...</>
   useEffect(() => {
     const getTotalExpense = async () => {
       try {
         const total = await GetCurrentMonthTotal(user.email)
         setTotalExpense(total)
         const monthPercentage = await GetLastMonthExpensePercentage(user.email, total)
-        setLastMonthPercentage(monthPercentage) 
+        setLastMonthPercentage(monthPercentage)
       } catch (ex) {
         if (ex instanceof Error) {
           toast.error(ex.message)
@@ -34,11 +31,9 @@ function App() {
           toast.error('Um error aconteceu.Tente novamente mais tarde')
         }
       }
-
     }
     getTotalExpense()
   }, [user])
- 
   return (
     <>
       <div className="hidden flex-col md:flex">
