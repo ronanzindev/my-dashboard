@@ -39,7 +39,7 @@ const Register = () => {
     }
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <Card className="mx-auto max-w-sm">
+            <Card className="mx-auto w-full max-w-sm">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl font-bold">Registro</CardTitle>
                     <CardDescription>Entre com seus dados para criar sua conta</CardDescription>

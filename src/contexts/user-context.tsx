@@ -1,3 +1,4 @@
+import { LoadingSpinner } from "@/components/load-spinner";
 import { getUserByToken } from "@/lib/user-db";
 import { UserDb } from "@/types/user";
 import Cookies from "js-cookie";
@@ -35,7 +36,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkUser()
     }, [navigate])
     if (loading) {
-        return <div>Carregando...</div> // Placeholder enquanto verifica
+        return (
+            <div className="w-screen h-screen flex items-center justify-center">
+                <LoadingSpinner className="w-16 h-16" />
+            </div>
+        )
     }
     return (
         <UserContext.Provider value={{ user, setUser }}>

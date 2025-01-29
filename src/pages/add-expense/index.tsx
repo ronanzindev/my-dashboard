@@ -72,7 +72,7 @@ const AddExpense = () => {
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-gray-100">
-            <Card className="mx-auto max-w-md">
+            <Card className="mx-auto w-full max-w-md">
                 <CardHeader className="">
                     <CardTitle className="text-2x1 font-bold">
                         Adicionar Gasto

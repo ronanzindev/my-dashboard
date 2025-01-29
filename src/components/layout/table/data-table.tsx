@@ -10,7 +10,7 @@ export default function DataTable<TData, TValue>({ columns, data }: DataTablePro
     const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() })
     return (
       <div>
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (

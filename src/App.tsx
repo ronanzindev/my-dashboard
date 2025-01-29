@@ -5,14 +5,21 @@ import { useUser } from "./contexts/user-context"
 import Header from "./components/layout/header"
 import Finances from "./components/layout/finance"
 import ExpenseManegement from "./components/expense-management"
+import { LoadingSpinner } from "./components/load-spinner"
 function App() {
   const { user } = useUser()
   const navigate = useNavigate()
-  if (!user) return <>Loading...</>
+  if (!user) {
+    return  (
+      <div className="w-full h-full flex items-center justify-center">
+        <LoadingSpinner/>
+      </div>
+    )
+  }
 
   return (
     <>
-      <div className="hidden flex-col md:flex">
+      <div className="flex flex-col">
         {/* Header */}
         <Header user={user} />
         {/* Main */}
