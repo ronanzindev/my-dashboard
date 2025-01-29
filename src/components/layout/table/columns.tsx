@@ -1,8 +1,8 @@
-import { Expenses } from "@/types/expenses"
+import { Expense } from "@/types/expenses"
 import { ColumnDef } from "@tanstack/react-table"
 import TableActions from "./actions"
 
-export const columns: ColumnDef<Expenses>[] = [
+export const columns: ColumnDef<Expense>[] = [
     {
         accessorKey: "tags.tag",
         header: () => <div className="font-bold">Tag</div>
@@ -15,6 +15,15 @@ export const columns: ColumnDef<Expenses>[] = [
             const formatted = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(amount)
             return <div className="font-medium">{formatted}</div>
         },
+    },
+    {
+        accessorKey: "expense_date",
+        header: "Data",
+        cell: ({row}) => {
+            const date = new Date(row.getValue("expense_date"))
+            const formatted = date.toLocaleDateString("pt-BR")
+            return <div>{formatted}</div>
+        }
     },
     {
         id: "action",

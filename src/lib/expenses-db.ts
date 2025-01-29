@@ -1,4 +1,4 @@
-import {  ExpenseDataChart, ExpenseInput, Expenses } from "@/types/expenses";
+import {  Expense, ExpenseDataChart, ExpenseInput, Expenses } from "@/types/expenses";
 import supabase from "./supabase";
 
 const EXPENSE_TABLE = "expenses"
@@ -56,7 +56,7 @@ export const GetRecentExpenses = async (user_email: string) => {
 }
 
 export const AllExpense = async (user_email: string) => {
-    const {data, error} = await supabase.from(EXPENSE_TABLE).select("value, id, tags(tag)").eq("user_email", user_email).order("created_at").returns<Expenses[]>()
+    const {data, error} = await supabase.from(EXPENSE_TABLE).select("value, id, expense_date, tags(tag)").eq("user_email", user_email).order("expense_date", {ascending: false}).returns<Expense[]>()
     if(error) {
         throw new Error("Error ao buscar gastos")
     }
