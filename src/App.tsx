@@ -6,6 +6,7 @@ import Header from "./components/layout/header"
 import Finances from "./components/layout/finance"
 import ExpenseManegement from "./components/expense-management"
 import { LoadingSpinner } from "./components/load-spinner"
+import { TagsCharts } from "./components/layout/charts/tags-charts"
 function App() {
   const { user } = useUser()
   const navigate = useNavigate()
@@ -31,15 +32,19 @@ function App() {
             </div>
           </div>
           <Tabs defaultValue="financas" className="space-y-4">
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="financas">Finanças</TabsTrigger>
               <TabsTrigger value="expenses">Gerenciar Gastos</TabsTrigger>
+              <TabsTrigger value="chart">Graficos</TabsTrigger>
             </TabsList>
             <TabsContent value="financas">
               <Finances user_email={user.email} />
             </TabsContent>
             <TabsContent value="expenses">
               <ExpenseManegement user_email={user.email} />
+            </TabsContent>
+            <TabsContent value="chart">
+              <TagsCharts user_email={user.email} />
             </TabsContent>
           </Tabs>
         </div>
