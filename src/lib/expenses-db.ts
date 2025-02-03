@@ -42,7 +42,7 @@ export const GetLastMonthExpensePercentage = async (user_email: string, currentM
     }
     const result = data as { value: number }[]
     if (result.length === 0) return 0
-    const lastMonthtotal = result[0].value
+    const lastMonthtotal = result.reduce((sum, item) => sum + item.value, 0)
     const diff = currentMonthTotal - lastMonthtotal
     const percentage = lastMonthtotal === 0 ? currentMonthTotal * 100 : ((diff / lastMonthtotal) * 100)
     return percentage
