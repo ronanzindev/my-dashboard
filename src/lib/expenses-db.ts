@@ -6,14 +6,14 @@ const EXPENSE_TABLE = "expenses"
 export const RegisteExpense = async (expense: ExpenseInput) => {
     const result = await supabase.from(EXPENSE_TABLE).insert(expense)
     if (result.error || result.status !== 201) {
-        throw Error("Error ao salvar gasto!")
+        throw Error("Error saving expense!")
     }
 }
 
 export const GetExpenseChart = async (user_email: string) => {
     const { data, error } = await supabase.rpc("get_expense_data", { email: user_email }, { get: true }).limit(12)
     if (error) {
-        throw new Error("Error ao buscar dados do gastos")
+        throw new Error("Error fetching expense data")
     }
     return data as ExpenseDataChart[]
 }
@@ -36,13 +36,14 @@ export const GetLastMonthExpensePercentage = async (user_email: string, currentM
     const mesAnterior = date.getMonth() + 1; // Ajuste, pois `getMonth()` retorna de 0 a 11
     const startDate = `${anoAnterior}-${String(mesAnterior).padStart(2, '0')}-01`;
     const endDate = `${anoAnterior}-${String(mesAnterior).padStart(2, '0')}-31`;
+
     const { data, error, status } = await supabase.from(EXPENSE_TABLE).select("value").eq("user_email", user_email).gte("expense_date", startDate).lte("expense_date", endDate)
     if (status !== 200 || error) {
         throw new Error("Error ao buscar dados do mes anterior")
     }
     const result = data as { value: number }[]
     if (result.length === 0) return 0
-    const lastMonthtotal = result[0].value
+    const lastMonthtotal = result.reduce((sum, item) => sum + item.value, 0)
     const diff = currentMonthTotal - lastMonthtotal
     const percentage = lastMonthtotal === 0 ? currentMonthTotal * 100 : ((diff / lastMonthtotal) * 100)
     return percentage
