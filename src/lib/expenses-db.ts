@@ -88,7 +88,7 @@ export const GetExpenseById = async (id: number) => {
 }
 
 export const GetAllTagExpense = async (user_email: string) => {
-    const { data, error } = await supabase.rpc("get_all_tags_expense", { email: user_email }).returns<TagsExpense[]>()
+    const { data, error } = await supabase.rpc("get_all_tags_expense", { email: user_email })
     if(error) throw new Error("Error ao buscar dados das tags")
-    return data
+    return data as TagsExpense[]
 }

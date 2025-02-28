@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "overrides": {
+    "eslint": "^8.50.0"
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@libsql/client": "^0.14.0",

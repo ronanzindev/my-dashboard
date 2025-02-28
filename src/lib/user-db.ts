@@ -8,7 +8,7 @@ const COOKIE_JWT_NAME = "jwt-token"
 const COOKIE_JWT_EXPIRES = 30
 const USER_TABLE = "users"
 const registerUser = async (user: User) => {
-    const { data: savedUser, error } = await supabase.from(USER_TABLE).insert(user).select("*").returns<UserDb>()
+    const { data: savedUser, error } = await supabase.from(USER_TABLE).insert(user).select("*").single()
     if (error || !savedUser) {
         if (error?.code == "23505") {
             throw new Error("Email indisponivel, por favor selecione outro")
