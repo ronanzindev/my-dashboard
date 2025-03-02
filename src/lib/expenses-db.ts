@@ -30,13 +30,13 @@ export const GetCurrentMonthTotal = async (user_email: string) => {
 }
 
 export const GetLastMonthExpensePercentage = async (user_email: string, currentMonthTotal: number) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - 1); // Define o mês para o anterior
-    const anoAnterior = date.getFullYear();
-    const mesAnterior = date.getMonth() + 1; // Ajuste, pois `getMonth()` retorna de 0 a 11
-    const startDate = `${anoAnterior}-${String(mesAnterior).padStart(2, '0')}-01`;
-    const endDate = `${anoAnterior}-${String(mesAnterior).padStart(2, '0')}-31`;
-
+    const now = new Date();
+    const firtsDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDayLastMonth = new Date(firtsDayCurrentMonth)
+    lastDayLastMonth.setDate(0)
+    const firstDayLastMonth = new Date(lastDayLastMonth.getFullYear(), lastDayLastMonth.getMonth(), 1)
+    const startDate = firstDayLastMonth.toISOString().split('T')[0]
+    const endDate = lastDayLastMonth.toISOString().split("T")[0]
     const { data, error, status } = await supabase.from(EXPENSE_TABLE).select("value").eq("user_email", user_email).gte("expense_date", startDate).lte("expense_date", endDate)
     if (status !== 200 || error) {
         throw new Error("Error ao buscar dados do mes anterior")
