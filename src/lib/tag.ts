@@ -3,7 +3,7 @@ import { Tag, TagInput } from "@/types/tags"
 const TAG_TABLE_NAME = "tags"
 const getTagsDb = async (email: string) => {
     const selectedTags = await supabase.from(TAG_TABLE_NAME).select("*").eq("user_email", email)
-    if(selectedTags.status !== 200) throw Error("Error ao buscar tags de gasto ") 
+    if(selectedTags.status !== 200) throw Error("Error ao buscar tags de gasto ")
     return selectedTags.data as Tag[]
 }
 const getTagDb = async (tag: string, email: string) => {
@@ -23,4 +23,17 @@ const createTagDb = async (tag: TagInput) => {
     if (result.status !== 201 || result.error || result.data.length === 0) throw Error("Error ao criar nova tag")
     return result.data[0] as Tag
 }
-export {getTagsDb,createTagDb }
+
+const DeleteTag = async (tagId: number) => {
+    const {error} = await supabase.from(TAG_TABLE_NAME).delete().eq("id", tagId)
+    if(error) {
+        throw new Error("Error ao deletar tag")
+    }
+}
+const UpdateTag = async(tagId: number, name: string) => {
+    const {error} = await supabase.from(TAG_TABLE_NAME).update({tag: name}).eq("id", tagId)
+    if(error) {
+        throw new Error("Error ao atualizar tag")
+    }
+}
+export {getTagsDb,createTagDb, DeleteTag, UpdateTag}

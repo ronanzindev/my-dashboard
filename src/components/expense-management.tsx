@@ -2,7 +2,7 @@ import { AllExpense } from "@/lib/expenses-db";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import DataTable from "./layout/table/data-table";
-import { columns } from "./layout/table/columns";
+import { expenseColumns } from "./layout/table/columns";
 import { LoadingSpinner } from "./load-spinner";
 
 interface ExpenseManegementProps {
@@ -22,7 +22,7 @@ const ExpenseManegement = ({ user_email }: ExpenseManegementProps) => {
   }
   return (
     <div>
-      <DataTable columns={columns} data={expenses!} />
+      <DataTable columns={expenseColumns} data={expenses!} />
     </div>
   )
 }

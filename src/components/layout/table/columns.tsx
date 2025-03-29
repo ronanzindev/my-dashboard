@@ -1,8 +1,9 @@
 import { Expense } from "@/types/expenses"
 import { ColumnDef } from "@tanstack/react-table"
-import TableActions from "./actions"
+import {ExpenseTableActions, TagTableActions} from "./actions"
+import { Tag } from "@/types/tags"
 
-export const columns: ColumnDef<Expense>[] = [
+export const expenseColumns: ColumnDef<Expense>[] = [
     {
         accessorKey: "tags.tag",
         header: () => <div className="font-bold">Tag</div>
@@ -31,7 +32,23 @@ export const columns: ColumnDef<Expense>[] = [
         cell: ({ row }) => {
             const expense = row.original
             return (
-              <TableActions expense={expense}/>
+              <ExpenseTableActions expense={expense}/>
+            )
+        }
+    }
+]
+export const tagsColumns: ColumnDef<Tag>[] = [
+    {
+        accessorKey: "tag",
+        header: () => <div className="font-bold">Nome</div>
+    },
+    {
+        id: "action",
+        header: "Ação",
+        cell: ({ row }) => {
+            const tag = row.original
+            return (
+              <TagTableActions tag={tag}/>
             )
         }
     }
